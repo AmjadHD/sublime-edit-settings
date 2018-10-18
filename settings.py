@@ -6,7 +6,7 @@ import sublime
 import sublime_plugin
 
 
-def platform():
+def _platform():
     global PLATFORM_NAME, PLATFORM_NAMES
     PLATFORM_NAMES = {
         'osx': 'OSX',
@@ -17,7 +17,7 @@ def platform():
     PLATFORM_NAMES = "|".join(PLATFORM_NAMES.values())
 
 
-platform()
+_platform()
 
 class TypeInputHandler(sublime_plugin.ListInputHandler):
 
@@ -36,6 +36,8 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
     PACKAGES = "${packages}/"
 
     # The patterns to extract datas of a file.
+    # the folder right after Packages must not be user
+    # the platform (if provided) must be the current
     SETTINGS_RE = re.compile(r"Packages/((?!User)(?:(?![^/]+$).)*/([^(.]+(?:\((?!%s).+\))?)\.sublime-settings)" % PLATFORM_NAMES)
     KEYMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-keymap)" % PLATFORM_NAMES)
     MOUSEMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-mousemap)" % PLATFORM_NAMES)
@@ -64,6 +66,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
             items.append(("🔧  " + name, self.PACKAGES + path))
         return sorted(items)
 
+    # special method for menus
     def _list_menus(self):
         items = deque()
         for f in sublime.find_resources('*.sublime-menu'):
@@ -120,7 +123,7 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
 
         variables = {
             'packages': '${packages}',
-            'platform': PLATFORM_NAME,
+            'platform': PLATFORM_NAME
         }
 
         base_file = sublime.expand_variables(base_file.replace('\\', '\\\\'), variables)
