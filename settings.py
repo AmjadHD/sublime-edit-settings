@@ -88,13 +88,13 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
 class EditSettingsCommand(sublime_plugin.ApplicationCommand):
 
     def input(self, args):
-        if "type" not in args:
-            return TypeInputHandler()
         if "base_file" not in args:
+            if "type" not in args:
+                return TypeInputHandler()
             return BaseFileInputHandler(args["type"])
         return None
 
-    def run(self, base_file, user_file=None, default=None):
+    def run(self, base_file, user_file=None, default=None, type=None):
         """
         :param base_file:
             A unicode string of the path to the base settings file. Typically
