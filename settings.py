@@ -109,6 +109,10 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
             An optional unicode string of the default contents if the user
             version of the settings file does not yet exist. Use "$0" to place
             the cursor.
+
+        :param type:
+            An optional unicode string that specifies what type of files to list,
+            takes one of "settings", "keymap", "mousemap" and "menu"
         """
 
         if base_file is None:
