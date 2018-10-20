@@ -11,7 +11,7 @@ def _platform():
     PLATFORM_NAMES = {
         'osx': 'OSX',
         'windows': 'Windows',
-        'linux': 'Linux',
+        'linux': 'Linux'
     }
     PLATFORM_NAME = PLATFORM_NAMES.pop(sublime.platform())
     PLATFORM_NAMES = "|".join(PLATFORM_NAMES.values())
@@ -120,6 +120,11 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
 
         if base_file is None:
             raise ValueError('No base_file argument was passed to edit_settings')
+        if default is None:
+            if base_file.endswith("settings"):
+                default = "{\n\t{\n\t\t$0\n\t}\n}\n"
+            else:
+                default = "[\n\t{\n\t\t$0\n\t}\n]\n"
 
         variables = {
             'packages': '${packages}',
