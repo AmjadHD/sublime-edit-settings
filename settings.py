@@ -38,7 +38,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
     # The patterns to extract datas of a file.
     # the folder right after Packages must not be user
     # the platform (if provided) must be the current
-    SETTINGS_RE = re.compile(r"Packages/((?!User)(?:(?![^/]+$).)*/([^(.]+(?:\((?!%s).+\))?)\.sublime-settings)" % PLATFORM_NAMES)
+    SETTINGS_RE = re.compile(r"Packages/((?!User)((?:(?![^/]+$).)*)/([^(.]+(?:\((?!%s).+\))?)\.sublime-settings)" % PLATFORM_NAMES)
     KEYMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-keymap)" % PLATFORM_NAMES)
     MOUSEMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-mousemap)" % PLATFORM_NAMES)
     MENU_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/([\w\s]+?)\.sublime-menu)")
@@ -66,6 +66,22 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
             items.append(("🔧  " + name, self.PACKAGES + path))
         return sorted(items)
 
+    # special method for settings
+    def _list_settings(self):
+        items = deque()
+        groups = [m.groups() for m in (self.SETTINGS_RE.match(f) for f in sublime.find_resources("*.sublime-settings")) if m]
+        names = [group[2] for group in groups]
+        # get repeated names
+        for name in set(names):
+            names.remove(name)
+        for path, pkg, name in groups:
+            # if name is repeated, show the package name as a hint
+            if name in names:
+                items.append(("🔧  %s\t%s" % (name, pkg), self.PACKAGES + path))
+            else:
+                items.append(("🔧  " + name, self.PACKAGES + path))
+        return sorted(items)
+
     # special method for menus
     def _list_menus(self):
         items = deque()
@@ -79,7 +95,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
 
     def list_items(self):
         if self.preferences == "settings":
-            return self._list_items("settings", self.SETTINGS_RE)
+            return self._list_settings()
         if self.preferences == "keymap":
             return self._list_items("keymap", self.KEYMAP_RE)
         if self.preferences == "mousemap":
