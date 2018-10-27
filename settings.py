@@ -6,18 +6,10 @@ import sublime
 import sublime_plugin
 
 
-def _platform():
-    global PLATFORM_NAME, PLATFORM_NAMES
-    PLATFORM_NAMES = {
-        'osx': 'OSX',
-        'windows': 'Windows',
-        'linux': 'Linux'
-    }
-    PLATFORM_NAME = PLATFORM_NAMES.pop(sublime.platform())
-    PLATFORM_NAMES = "|".join(PLATFORM_NAMES.values())
+PLATFORM_NAMES = {'osx': 'OSX', 'windows': 'Windows', 'linux': 'Linux'}
+PLATFORM_NAME = PLATFORM_NAMES.pop(sublime.platform())
+PLATFORM_NAMES = "|".join(PLATFORM_NAMES.values())
 
-
-_platform()
 
 class TypeInputHandler(sublime_plugin.ListInputHandler):
 
