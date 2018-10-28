@@ -30,7 +30,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
     # The patterns to extract datas of a file.
     # the folder right after Packages must not be user
     # the platform (if provided) must be the current
-    SETTINGS_RE = re.compile(r"Packages/((?!User)((?:(?![^/]+$).)*)/([^(.]+(?:\((?!%s).+\))?)\.sublime-settings)" % PLATFORM_NAMES)
+    SETTINGS_RE = re.compile(r"Packages/((?!User)((?![^/]+$).*)/([^(.]+(?:\((?!%s).+\))?)\.sublime-settings)" % PLATFORM_NAMES)
     KEYMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-keymap)" % PLATFORM_NAMES)
     MOUSEMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-mousemap)" % PLATFORM_NAMES)
     MENU_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/([\w\s]+?)\.sublime-menu)")
