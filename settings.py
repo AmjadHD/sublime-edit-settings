@@ -66,9 +66,10 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
         # get repeated names
         for name in set(names):
             names.remove(name)
+        repeated_names = set(names)
         for path, pkg, name in groups:
             # if name is repeated, show the package name as a hint
-            if name in names:
+            if name in repeated_names:
                 items.append(("🔧  %s\t%s" % (name, pkg), self.PACKAGES + path))
             else:
                 items.append(("🔧  " + name, self.PACKAGES + path))
