@@ -162,7 +162,7 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
             # platform-variant file path, then try and non-platform-variant
             # file path.
             if not os.path.exists(os.path.join(user_package_path, file_name)):
-                for suffix in {'.sublime-keymap', '.sublime-mousemap', '.sublime-menu'}:
+                for suffix in {'.sublime-keymap', '.sublime-mousemap', '.sublime-settings'}:
                     platform_suffix = ' (%s)%s' % (PLATFORM_NAME, suffix)
                     if not file_name.endswith(platform_suffix):
                         continue
