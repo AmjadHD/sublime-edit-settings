@@ -131,7 +131,7 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
             raise ValueError('No base_file argument was passed to edit_settings')
         if default is None:
             if base_file.endswith("settings"):
-                default = "{\n\t{\n\t\t$0\n\t}\n}\n"
+                default = "{\n\t$0\n}\n"
             else:
                 default = "[\n\t{\n\t\t$0\n\t}\n]\n"
 
