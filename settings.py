@@ -11,7 +11,7 @@ PLATFORM_NAME = PLATFORM_NAMES.pop(sublime.platform())
 PLATFORM_NAMES = "|".join(PLATFORM_NAMES.values())
 
 
-class TypeInputHandler(sublime_plugin.ListInputHandler):
+class KindInputHandler(sublime_plugin.ListInputHandler):
 
     def placeholder(self):
         return "Preferences"
@@ -20,7 +20,7 @@ class TypeInputHandler(sublime_plugin.ListInputHandler):
         return ["settings", "keymap", "mousemap", "menu"]
 
     def next_input(self, args):
-        return BaseFileInputHandler(args["type"])
+        return BaseFileInputHandler(args["kind"])
 
 
 class BaseFileInputHandler(sublime_plugin.ListInputHandler):
@@ -48,9 +48,9 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
         else:
             return None
 
-    def _list_items(self, type, pattern):
+    def _list_items(self, kind, pattern):
         items = deque()
-        for f in sublime.find_resources("*.sublime-" + type):
+        for f in sublime.find_resources("*.sublime-" + kind):
             m = pattern.match(f)
             if not m:
                 continue
@@ -61,8 +61,15 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
     # special method for settings
     def _list_settings(self):
         items = deque()
-        groups = [m.groups() for m in (self.SETTINGS_RE.match(f) for f in sublime.find_resources("*.sublime-settings")) if m]
-        names = [group[2] for group in groups]
+        groups = deque()
+        names = deque()
+        for f in sublime.find_resources("*.sublime-settings"):
+            m = self.SETTINGS_RE.match(f)
+            if not m:
+                continue
+            mg = m.groups()
+            groups.append(mg)
+            names.append(mg[2])
         # get repeated names
         for name in set(names):
             names.remove(name)
@@ -82,8 +89,8 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
             m = self.MENU_RE.match(f)
             if not m:
                 continue
-            path, name, type = m.groups()
-            items.append(("🔧  %s\t%s" % (name, type), self.PACKAGES + path))
+            path, name, kind = m.groups()
+            items.append(("🔧  %s\t%s" % (name, kind), self.PACKAGES + path))
         return sorted(items)
 
     def list_items(self):
@@ -101,12 +108,12 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
 
     def input(self, args):
         if "base_file" not in args:
-            if "type" not in args:
-                return TypeInputHandler()
-            return BaseFileInputHandler(args["type"])
+            if "kind" not in args:
+                return KindInputHandler()
+            return BaseFileInputHandler(args["kind"])
         return None
 
-    def run(self, base_file, user_file=None, default=None, type=None):
+    def run(self, base_file, user_file=None, default=None, kind=None):
         """
         :param base_file:
             A unicode string of the path to the base settings file. Typically
@@ -122,8 +129,8 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
             version of the settings file does not yet exist. Use "$0" to place
             the cursor.
 
-        :param type:
-            An optional unicode string that specifies what type of files to list,
+        :param kind:
+            An optional unicode string that specifies what kind of files to list,
             takes one of "settings", "keymap", "mousemap" and "menu"
         """
 
