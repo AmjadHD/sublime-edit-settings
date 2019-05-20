@@ -6,9 +6,9 @@ import sublime
 import sublime_plugin
 
 
-PLATFORM_NAMES = {'osx': 'OSX', 'windows': 'Windows', 'linux': 'Linux'}
-PLATFORM_NAME = PLATFORM_NAMES.pop(sublime.platform())
-PLATFORM_NAMES = "|".join(PLATFORM_NAMES.values())
+platforms = {"osx": "OSX", "windows": "Windows", "linux": "Linux"}
+PLATFORM = platforms.pop(sublime.platform())
+IGNORED_PLATFORMS = "|".join(platforms.values())
 
 
 class KindInputHandler(sublime_plugin.ListInputHandler):
@@ -30,9 +30,9 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
     # The patterns to extract datas of a file.
     # the folder right after Packages must not be user
     # the platform (if provided) must be the current
-    SETTINGS_RE = re.compile(r"Packages/((?!User)((?![^/]+$).*)/([^(.]+(?:\((?!%s).+\))?)\.sublime-settings)" % PLATFORM_NAMES)
-    KEYMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-keymap)" % PLATFORM_NAMES)
-    MOUSEMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-mousemap)" % PLATFORM_NAMES)
+    SETTINGS_RE = re.compile(r"Packages/((?!User)((?![^/]+$).*)/([^(.]+(?:\((?!%s).+\))?)\.sublime-settings)" % IGNORED_PLATFORMS)
+    KEYMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-keymap)" % IGNORED_PLATFORMS)
+    MOUSEMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-mousemap)" % IGNORED_PLATFORMS)
     MENU_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/([\w\s]+?)\.sublime-menu)")
 
     def __init__(self, preferences):
@@ -85,7 +85,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
     # special method for menus
     def _list_menus(self):
         items = deque()
-        for f in sublime.find_resources('*.sublime-menu'):
+        for f in sublime.find_resources("*.sublime-menu"):
             m = self.MENU_RE.match(f)
             if not m:
                 continue
@@ -135,7 +135,7 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
         """
 
         if base_file is None:
-            raise ValueError('No base_file argument was passed to edit_settings')
+            raise ValueError("No base_file argument was passed to edit_settings")
         if default is None:
             if base_file.endswith("settings"):
                 default = "{\n\t$0\n}\n"
@@ -143,16 +143,16 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
                 default = "[\n\t{\n\t\t$0\n\t}\n]\n"
 
         variables = {
-            'packages': '${packages}',
-            'platform': PLATFORM_NAME
+            "packages": "${packages}",
+            "platform": PLATFORM
         }
 
-        base_file = sublime.expand_variables(base_file.replace('\\', '\\\\'), variables)
+        base_file = sublime.expand_variables(base_file.replace("\\", "\\\\"), variables)
         if user_file is not None:
-            user_file = sublime.expand_variables(user_file.replace('\\', '\\\\'), variables)
+            user_file = sublime.expand_variables(user_file.replace("\\", "\\\\"), variables)
 
-        base_path = base_file.replace('${packages}', 'res://Packages')
-        is_resource = base_path.startswith('res://')
+        base_path = base_file.replace("${packages}", "res://Packages")
+        is_resource = base_path.startswith("res://")
         file_name = os.path.basename(base_file)
         resource_exists = is_resource and base_path[6:] in sublime.find_resources(file_name)
         filesystem_exists = (not is_resource) and os.path.exists(base_path)
@@ -162,15 +162,15 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
             return
 
         if user_file is None:
-            user_package_path = os.path.join(sublime.packages_path(), 'User')
+            user_package_path = os.path.join(sublime.packages_path(), "User")
             user_file = os.path.join(user_package_path, file_name)
 
             # If the user path does not exist, and it is a supported
             # platform-variant file path, then try and non-platform-variant
             # file path.
             if not os.path.exists(os.path.join(user_package_path, file_name)):
-                for suffix in {'.sublime-keymap', '.sublime-mousemap', '.sublime-settings'}:
-                    platform_suffix = ' (%s)%s' % (PLATFORM_NAME, suffix)
+                for suffix in (".sublime-keymap", ".sublime-mousemap", ".sublime-settings"):
+                    platform_suffix = " (%s)%s" % (PLATFORM, suffix)
                     if not file_name.endswith(platform_suffix):
                         continue
                     non_platform_file_name = file_name[:-len(platform_suffix)] + suffix
@@ -179,20 +179,19 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
                         user_file = non_platform_path
                         break
 
-        sublime.run_command('new_window')
+        sublime.run_command("new_window")
         new_window = sublime.active_window()
 
-        new_window.run_command(
-            'set_layout',
+        new_window.set_layout(
             {
-                'cols': [0.0, 0.5, 1.0],
-                'rows': [0.0, 1.0],
-                'cells': [[0, 0, 1, 1], [1, 0, 2, 1]]
+                "cols": (0.0, 0.5, 1.0),
+                "rows": (0.0, 1.0),
+                "cells": ((0, 0, 1, 1), (1, 0, 2, 1))
             })
         new_window.focus_group(0)
         new_window.run_command('open_file', {'file': base_file})
         new_window.focus_group(1)
-        new_window.run_command('open_file', {'file': user_file, 'contents': default})
+        new_window.run_command("open_file", {"file": user_file, "contents": default})
 
         new_window.set_tabs_visible(True)
         new_window.set_sidebar_visible(False)
@@ -201,15 +200,15 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
         user_view = new_window.active_view_in_group(1)
 
         base_settings = base_view.settings()
-        base_settings.set('edit_settings_view', 'base')
-        base_settings.set('edit_settings_other_view_id', user_view.id())
+        base_settings.set("edit_settings_view", "base")
+        base_settings.set("edit_settings_other_view_id", user_view.id())
 
         user_settings = user_view.settings()
-        user_settings.set('edit_settings_view', 'user')
-        user_settings.set('edit_settings_other_view_id', base_view.id())
+        user_settings.set("edit_settings_view", "user")
+        user_settings.set("edit_settings_other_view_id", base_view.id())
         if not os.path.exists(user_file):
             user_view.set_scratch(True)
-            user_settings.set('edit_settings_default', default.replace('$0', ''))
+            user_settings.set("edit_settings_default", default.replace("$0", ""))
 
 
 class EditSyntaxSettingsCommand(sublime_plugin.WindowCommand):
