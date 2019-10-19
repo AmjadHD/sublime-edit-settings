@@ -1,21 +1,24 @@
 # sublime-edit-settings
-a patch for the sublime text edit_settings command
 
-![screenshot_1](https://user-images.githubusercontent.com/33235928/47184421-e7739900-d32a-11e8-9769-25a3d5933004.png)
+A patch for the sublime text edit_settings command
 
-![screenshot_2](https://user-images.githubusercontent.com/33235928/47184717-b34ca800-d32b-11e8-91be-7059a7a90b23.png)
+![in_action](https://user-images.githubusercontent.com/33235928/67150807-86bfc900-f2bc-11e9-96a3-5de3b0ed15b8.gif)
+
+![image](https://user-images.githubusercontent.com/33235928/67150882-c89d3f00-f2bd-11e9-8853-4a7df0b8cc5a.png)
+
+![image](https://user-images.githubusercontent.com/33235928/67150861-7825e180-f2bd-11e9-81f8-81f32e46631b.png)
 
 ## Usage
 
 #### without arguments
-- displays a list of kinds of preferences files
+- displays a list of kinds of configuration files,
 choosing one displays a list of files of the chosen kind.
-#### with `base_file` only
-- opens the file as usual
+
+#### with `base_file`
+- opens the file as usual (`kind` is ignored)
+
 #### with `kind` only
 - displays a list of files of the kind `kind`
-#### with `base_file` and `kind`
-- opens the file as usual (`kind` is ignored)
 
 ## Note
 - files in the `User` folder are ignored from lists
