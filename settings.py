@@ -46,8 +46,8 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
                          r"([\w\s]+?)"
                          r"\.sublime-menu)")
 
-    def __init__(self, preferences):
-        self.preferences = preferences
+    def __init__(self, kind):
+        self.kind = kind
 
     def placeholder(self):
         return "File"
@@ -56,60 +56,55 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
         """Show the full path in the preview area"""
         return value[12:] if value else None
 
-    def _list_items(self, kind, pattern):
-        items = []
-        for f in sublime.find_resources("*.sublime-" + kind):
-            m = pattern.match(f)
-            if not m:
-                continue
-            path, name = m.groups()
-            items.append((name, self.PACKAGES + path))
-        return sorted(items)
-
-    # special method for settings
-    def _list_settings(self):
-        groups = []
-        names = []
-        for f in sublime.find_resources("*.sublime-settings"):
-            m = self.SETTINGS_RE.match(f)
-            if not m:
-                continue
-            mg = m.groups()
-            groups.append(mg)
-            names.append(mg[2])
-
-        # get repeated names
-        for name in set(names):
-            names.remove(name)
-        repeated_names = set(names)
-
-        # if there's more than one settings file with the same name show
-        # their packages as hints.
-        return sorted(("%s\t%s" % (name, pkg) if name in repeated_names else name,
-                       self.PACKAGES + path)
-                      for path, pkg, name in groups)
-
-    # special method for menus
-    def _list_menus(self):
-        items = []
-        for f in sublime.find_resources("*.sublime-menu"):
-            m = self.MENU_RE.match(f)
-            if not m:
-                continue
-            path, pkg, name = m.groups()
-            # show the menu's name as a hint (e.g Context, SideBar, ...)
-            items.append(("%s\t%s" % (pkg, name), self.PACKAGES + path))
-        return sorted(items)
-
     def list_items(self):
-        if self.preferences == "settings":
-            return self._list_settings()
-        if self.preferences == "keymap":
-            return self._list_items("keymap", self.KEYMAP_RE)
-        if self.preferences == "mousemap":
-            return self._list_items("mousemap", self.MOUSEMAP_RE)
-        if self.preferences == "menu":
-            return self._list_menus()
+
+        if self.kind in ("keymap", "mousemap"):
+            items = []
+            pattern = self.KEYMAP_RE if self.kind == "keymap" else self.MOUSEMAP_RE
+            for f in sublime.find_resources("*.sublime-" + self.kind):
+                match = pattern.match(f)
+                if not match:
+                    continue
+                path, name = match.groups()
+                items.append((name, self.PACKAGES + path))
+            return sorted(items)
+
+        if self.kind == "settings":
+            groups = []
+            names = []
+            for f in sublime.find_resources("*.sublime-settings"):
+                match = self.SETTINGS_RE.match(f)
+                if not match:
+                    continue
+                mg = match.groups()
+                groups.append(mg)
+                names.append(mg[2])
+
+            # get repeated names
+            for name in set(names):
+                names.remove(name)
+            repeated_names = set(names)
+
+            # if there's more than one settings file with the same name show
+            # their packages as hints.
+            return sorted(("%s\t%s" % (name, pkg) if name in repeated_names else name,
+                           self.PACKAGES + path)
+                          for path, pkg, name in groups)
+
+        if self.kind == "menu":
+            items = []
+            for f in sublime.find_resources("*.sublime-menu"):
+                match = self.MENU_RE.match(f)
+                if not match:
+                    continue
+                path, pkg, name = match.groups()
+                # show the menu's name as a hint (e.g Context, SideBar, ...)
+                items.append(("%s\t%s" % (pkg, name), self.PACKAGES + path))
+            return sorted(items)
+
+        sublime.error_message('edit_settings:\n\nkind must be one of:'
+                              '\n- "settings"\n- "keymap"\n- "menu"\n- "mousemap'
+                              '\ngot ' + repr(self.kind))
 
 
 class EditSettingsCommand(sublime_plugin.ApplicationCommand):
