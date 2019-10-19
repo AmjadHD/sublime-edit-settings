@@ -96,8 +96,9 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
             m = self.MENU_RE.match(f)
             if not m:
                 continue
-            path, name, kind = m.groups()
-            items.append(("%s\t%s" % (name, kind), self.PACKAGES + path))
+            path, pkg, name = m.groups()
+            # show the menu's name as a hint (e.g Context, SideBar, ...)
+            items.append(("%s\t%s" % (pkg, name), self.PACKAGES + path))
         return sorted(items)
 
     def list_items(self):
