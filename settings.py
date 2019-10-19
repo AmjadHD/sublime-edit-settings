@@ -121,6 +121,9 @@ class EditSettingsCommand(sublime_plugin.ApplicationCommand):
             return BaseFileInputHandler(args["kind"])
         return None
 
+    def input_description(self):
+        return "Edit"
+
     def run(self, base_file, user_file=None, default=None, kind=None):
         """
         :param base_file:
