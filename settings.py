@@ -1,6 +1,5 @@
 import re
 import os.path
-from collections import deque
 
 import sublime
 import sublime_plugin
@@ -58,7 +57,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
         return value[12:] if value else None
 
     def _list_items(self, kind, pattern):
-        items = deque()
+        items = []
         for f in sublime.find_resources("*.sublime-" + kind):
             m = pattern.match(f)
             if not m:
@@ -69,9 +68,9 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
 
     # special method for settings
     def _list_settings(self):
-        items = deque()
-        groups = deque()
-        names = deque()
+        items = []
+        groups = []
+        names = []
         for f in sublime.find_resources("*.sublime-settings"):
             m = self.SETTINGS_RE.match(f)
             if not m:
@@ -94,7 +93,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
 
     # special method for menus
     def _list_menus(self):
-        items = deque()
+        items = []
         for f in sublime.find_resources("*.sublime-menu"):
             m = self.MENU_RE.match(f)
             if not m:
