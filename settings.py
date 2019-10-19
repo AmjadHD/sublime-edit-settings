@@ -68,7 +68,6 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
 
     # special method for settings
     def _list_settings(self):
-        items = []
         groups = []
         names = []
         for f in sublime.find_resources("*.sublime-settings"):
@@ -83,13 +82,12 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
         for name in set(names):
             names.remove(name)
         repeated_names = set(names)
-        for path, pkg, name in groups:
-            # if name is repeated, show the package name as a hint
-            if name in repeated_names:
-                items.append(("%s\t%s" % (name, pkg), self.PACKAGES + path))
-            else:
-                items.append((name, self.PACKAGES + path))
-        return sorted(items)
+
+        # if there's more than one settings file with the same name show
+        # their packages as hints.
+        return sorted(("%s\t%s" % (name, pkg) if name in repeated_names else name,
+                       self.PACKAGES + path)
+                      for path, pkg, name in groups)
 
     # special method for menus
     def _list_menus(self):
