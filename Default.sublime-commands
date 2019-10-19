@@ -1,6 +1,6 @@
 [
     {
-        "caption": "Edit",
+        "caption": "Edit Configurations",
         "command": "edit_settings"
     }
 ]
