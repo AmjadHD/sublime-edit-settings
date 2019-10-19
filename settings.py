@@ -15,7 +15,7 @@ class KindInputHandler(sublime_plugin.ListInputHandler):
     """Shows a list of configuration kinds to choose one as the 'kind' argument."""
 
     def placeholder(self):
-        return "Preferences"
+        return "configurations"
 
     def list_items(self):
         return ["settings", "keymap", "mousemap", "menu"]
@@ -55,10 +55,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
 
     def preview(self, value):
         """Show the full path in the preview area"""
-        if value:
-            return sublime.Html('<span style="color: white">File: ' + value[12:] + '</span>')
-        else:
-            return None
+        return value[12:] if value else None
 
     def _list_items(self, kind, pattern):
         items = deque()
@@ -67,7 +64,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
             if not m:
                 continue
             path, name = m.groups()
-            items.append(("🔧  " + name, self.PACKAGES + path))
+            items.append((name, self.PACKAGES + path))
         return sorted(items)
 
     # special method for settings
@@ -82,6 +79,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
             mg = m.groups()
             groups.append(mg)
             names.append(mg[2])
+
         # get repeated names
         for name in set(names):
             names.remove(name)
@@ -89,9 +87,9 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
         for path, pkg, name in groups:
             # if name is repeated, show the package name as a hint
             if name in repeated_names:
-                items.append(("🔧  %s\t%s" % (name, pkg), self.PACKAGES + path))
+                items.append(("%s\t%s" % (name, pkg), self.PACKAGES + path))
             else:
-                items.append(("🔧  " + name, self.PACKAGES + path))
+                items.append((name, self.PACKAGES + path))
         return sorted(items)
 
     # special method for menus
@@ -102,7 +100,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
             if not m:
                 continue
             path, name, kind = m.groups()
-            items.append(("🔧  %s\t%s" % (name, kind), self.PACKAGES + path))
+            items.append(("%s\t%s" % (name, kind), self.PACKAGES + path))
         return sorted(items)
 
     def list_items(self):
