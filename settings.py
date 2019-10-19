@@ -12,6 +12,7 @@ IGNORED_PLATFORMS = "|".join(platforms.values())
 
 
 class KindInputHandler(sublime_plugin.ListInputHandler):
+    """Shows a list of configuration kinds to choose one as the 'kind' argument."""
 
     def placeholder(self):
         return "Preferences"
@@ -24,16 +25,27 @@ class KindInputHandler(sublime_plugin.ListInputHandler):
 
 
 class BaseFileInputHandler(sublime_plugin.ListInputHandler):
+    """Shows a list of items to choose one as the 'base_file' argument."""
 
     PACKAGES = "${packages}/"
 
-    # The patterns to extract datas of a file.
-    # the folder right after Packages must not be user
-    # the platform (if provided) must be the current
-    SETTINGS_RE = re.compile(r"Packages/((?!User)((?![^/]+$).*)/([^(.]+(?:\((?!%s).+\))?)\.sublime-settings)" % IGNORED_PLATFORMS)
-    KEYMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-keymap)" % IGNORED_PLATFORMS)
-    MOUSEMAP_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/Default(?: \((?!%s).+\))?\.sublime-mousemap)" % IGNORED_PLATFORMS)
-    MENU_RE = re.compile(r"Packages/((?!User)([^/]+)(?:(?![^/]+$).)*/([\w\s]+?)\.sublime-menu)")
+    # exclude user files and platform variants other than the current
+    SETTINGS_RE = re.compile(r"Packages/("
+                             r"(?!User)((?![^/]+$).+)/"  # package
+                             r"([^(.]+(?:\((?!%s)[^).]+\))?)"  # name
+                             r"\.sublime-settings)" % IGNORED_PLATFORMS)
+    KEYMAP_RE = re.compile(r"Packages/("
+                           r"(?!User)([^/]+)(?:(?![^/]+$).*)/"
+                           r"Default(?: \((?!%s)[^).]+\))?"
+                           r"\.sublime-keymap)" % IGNORED_PLATFORMS)
+    MOUSEMAP_RE = re.compile(r"Packages/("
+                             r"(?!User)([^/]+)(?:(?![^/]+$).*)/"
+                             r"Default(?: \((?!%s)[^).]+\))?"
+                             r"\.sublime-mousemap)" % IGNORED_PLATFORMS)
+    MENU_RE = re.compile(r"Packages/("
+                         r"(?!User)([^/]+)(?:(?![^/]+$).*)/"
+                         r"([\w\s]+?)"
+                         r"\.sublime-menu)")
 
     def __init__(self, preferences):
         self.preferences = preferences
