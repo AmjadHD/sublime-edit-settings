@@ -54,7 +54,7 @@ class BaseFileInputHandler(sublime_plugin.ListInputHandler):
 
     def preview(self, value):
         """Show the full path in the preview area"""
-        return value[12:] if value else None
+        return value[12:]
 
     def list_items(self):
 
